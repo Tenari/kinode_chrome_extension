@@ -142,11 +142,35 @@ function populateGlobalTweetMap() {
     }
 }
 
-function parseState() {
+function sendDataToKinode() {
+    if (globalTweetMap.size > 0) {
+        fetch('http://localhost:8080/data:command_center:appattacc.os/populate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify([...globalTweetMap])
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            if (data.success) {
+                globalTweetMap.clear();
+                console.log('Tweet map cleared after successful ingestion.');
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+}
+
+function ingest() {
     populateGlobalTweetMap();
+    sendDataToKinode();
 }
 
 console.log("Running Kinode Extension"); 
-parseState();
-setInterval(parseState, 5000); 
+ingest();
+setInterval(ingest, 5000); 
 
