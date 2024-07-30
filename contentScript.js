@@ -50,7 +50,8 @@ function extractTweetDate(tweet) {
     const timeElement = tweet.querySelector('time');
     let tweetDate = null;
     if (timeElement) {
-        tweetDate = timeElement.getAttribute('datetime'); 
+        const datetime = timeElement.getAttribute('datetime');
+        tweetDate = new Date(datetime).getTime() / 1000; // Convert to seconds
     }
     return tweetDate;
 }
@@ -134,7 +135,7 @@ function populateGlobalTweetMap() {
             tweetData.set("comments", comments);
             tweetData.set("retweets", retweets);
             tweetData.set("views", views);
-            tweetData.set("userLikesTweet", userLikesTheTweet);
+            tweetData.set("user_likes_tweet", userLikesTheTweet);
 
             globalTweetMap.set(tweetId, tweetData);
             console.log(globalTweetMap);
@@ -144,12 +145,20 @@ function populateGlobalTweetMap() {
 
 function sendDataToKinode() {
     if (globalTweetMap.size > 0) {
-        fetch('http://localhost:8080/data:command_center:appattacc.os/populate', {
+        // Convert each Map entry to an object
+        let obj = {};
+        globalTweetMap.forEach((value, key) => {
+            obj[key] = Object.fromEntries(value);
+        });
+
+        let body = JSON.stringify(obj);
+        console.log(body);
+        fetch('http://localhost:8080/storage:command_center:appattacc.os/populate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify([...globalTweetMap])
+            body: body
         })
         .then(response => response.json())
         .then(data => {
