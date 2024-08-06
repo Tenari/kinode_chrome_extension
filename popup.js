@@ -6,6 +6,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('remove-rule').addEventListener('click', function() {
         removeRule();
     });
+    document.getElementById('url').addEventListener('change', function() {
+        const val = this.value;
+        chrome.storage.local.set({'url': val}, function() {
+            console.log('url value saved:', val);
+        });
+    });
     document.getElementById('port').addEventListener('change', function() {
         const portValue = this.value;
         chrome.storage.local.set({'port': portValue}, function() {
@@ -25,14 +31,17 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function fetchSettings() {
-    chrome.storage.local.get(['port', 'api_key'], function(result) {
+    chrome.storage.local.get(['port', 'api_key', 'url'], function(result) {
+        const url = result.url || 'http://localhost';
+        document.getElementById('url').value = url;
+
         const port = result.port || '8080';
         document.getElementById('port').value = port;
 
         const apiKey = result.api_key || '';
         document.getElementById('api-key').value = apiKey;
 
-        fetch(`http://localhost:${port}/main:filter:appattacc.os/fetch_settings`, {
+        fetch(`${url}:${port}/main:filter:appattacc.os/fetch_settings`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -85,12 +94,13 @@ function removeRule() {
 let timeoutId;
 
 function submitSettings() {
+    const url = document.getElementById('url').value || 'http://localhost';
     const port = document.getElementById('port').value || '8080';
     const rules = Array.from(document.querySelectorAll('.rule')).map(input => input.value);
     const is_on = document.getElementById('toggle').checked;
     const api_key = document.getElementById('api-key').value;
 
-    fetch(`http://localhost:${port}/main:filter:appattacc.os/submit_settings`, {
+    fetch(`${url}:${port}/main:filter:appattacc.os/submit_settings`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

@@ -153,24 +153,28 @@ function sendDataToKinode() {
 
         let body = JSON.stringify(obj);
         console.log(body);
-        fetch('http://localhost:8080/storage:command_center:appattacc.os/populate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: body
+        chrome.storage.local.get(['url','port'], function(r) {
+          const url = r.url || 'http://localhost';
+          const port = r.port || '8080';
+          fetch(`${url}:${port}/storage:storage:meme-deck.os/populate`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: body
+          })
+          .then(response => response.json())
+          .then(data => {
+              console.log('Success:', data);
+              if (data.success) {
+                  globalTweetMap.clear();
+                  console.log('Tweet map cleared after successful ingestion.');
+              }
+          })
+          .catch((error) => {
+              console.error('Error:', error);
+          });
         })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-            if (data.success) {
-                globalTweetMap.clear();
-                console.log('Tweet map cleared after successful ingestion.');
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
     }
 }
 
