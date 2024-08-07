@@ -1,11 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
     fetchSettings();
-    document.getElementById('add-rule').addEventListener('click', function() {
-        addRule();
-    });
-    document.getElementById('remove-rule').addEventListener('click', function() {
-        removeRule();
-    });
     document.getElementById('url').addEventListener('change', function() {
         const val = this.value;
         chrome.storage.local.set({'url': val}, function() {
@@ -24,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('API Key value saved:', apiKeyValue);
         });
     });
-    document.getElementById('save').addEventListener('click', submitSettings);
 
     document.getElementById('toggle').addEventListener('click', showCheckmark);
     document.getElementById('checkmark').addEventListener('click', toggleCheckmark);
@@ -41,54 +34,12 @@ function fetchSettings() {
         const apiKey = result.api_key || '';
         document.getElementById('api-key').value = apiKey;
 
-        fetch(`${url}:${port}/main:filter:appattacc.os/fetch_settings`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({})
-        })
-        .then(response => response.json())
-        .then(data => {
-            displayRules(data.rules);
-            setToggleState(data.is_on);
-        })
-        .catch(error => console.error('Error fetching settings:', error));
-    });
-}
-
-function displayRules(rules) {
-    const container = document.getElementById('rules-container');
-    container.innerHTML = '';
-    rules.forEach(rule => {
-        const textareaElement = document.createElement('textarea');
-        textareaElement.classList.add('rule');
-        textareaElement.value = rule;
-        textareaElement.addEventListener('input', autoResize, false);
-        container.appendChild(textareaElement);
     });
 }
 
 function setToggleState(is_on) {
     const toggle = document.getElementById('toggle');
     toggle.checked = is_on;
-}
-
-function addRule() {
-    const container = document.getElementById('rules-container');
-    const textareaElement = document.createElement('textarea');
-    textareaElement.classList.add('rule');
-    textareaElement.placeholder = "Enter a rule";
-    textareaElement.addEventListener('input', autoResize, false);
-    container.appendChild(textareaElement);
-}
-
-function removeRule() {
-    const container = document.getElementById('rules-container');
-    const lastRuleElement = container.lastElementChild;
-    if (lastRuleElement) {
-        container.removeChild(lastRuleElement);
-    }
 }
 
 let timeoutId;
@@ -99,23 +50,6 @@ function submitSettings() {
     const rules = Array.from(document.querySelectorAll('.rule')).map(input => input.value);
     const is_on = document.getElementById('toggle').checked;
     const api_key = document.getElementById('api-key').value;
-
-    fetch(`${url}:${port}/main:filter:appattacc.os/submit_settings`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            rules: rules,
-            is_on: is_on,
-            api_key: api_key
-        })
-    }).then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        fetchSettings();
-    }).catch(error => console.error('Error submitting settings:', error));
 
 }
 

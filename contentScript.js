@@ -156,7 +156,7 @@ function sendDataToKinode() {
         chrome.storage.local.get(['url','port'], function(r) {
           const url = r.url || 'http://localhost';
           const port = r.port || '8080';
-          fetch(`${url}:${port}/storage:storage:meme-deck.os/populate`, {
+          fetch(`${url}:${port}/storage:memedeck:meme-deck.os/populate`, {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json'
