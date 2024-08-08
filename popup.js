@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('API Key value saved:', apiKeyValue);
         });
     });
-
+    document.getElementById('save').addEventListener('click', submitSettings);
     document.getElementById('toggle').addEventListener('click', showCheckmark);
     document.getElementById('checkmark').addEventListener('click', toggleCheckmark);
 });
@@ -50,7 +50,23 @@ function submitSettings() {
     const rules = Array.from(document.querySelectorAll('.rule')).map(input => input.value);
     const is_on = document.getElementById('toggle').checked;
     const api_key = document.getElementById('api-key').value;
-
+    fetch(`${url}:${port}/memedeck:memedeck:meme-deck.os/submit_settings`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            groq_key: api_key
+        })
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        fetchSettings();
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = "Saved!";
+        document.getElementById('save').insertAdjacentElement('beforebegin', tempDiv);
+    }).catch(error => console.error('Error submitting settings:', error));
 }
 
 function autoResize() {
